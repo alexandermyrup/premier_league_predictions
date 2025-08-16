@@ -21,14 +21,46 @@ df = pd.read_csv("Data/PL-games-19-24-feature-engineered-final-3-normalised.csv"
 odds = pd.read_csv("Data/PL-games-19-24-feature-engineered-final-3.csv", parse_dates=["Date"]) \
     .dropna().sort_values("Date")
 
-# --- Train/Validation split ---
-t = int(len(df) * 0.7)
-v = int(len(df) * 0.85)
-X_train = df.iloc[:t].drop(["Date","HomeTeam","AwayTeam","target"], axis=1)
-y_train = df.iloc[:t]["target"].values
-X_valid = df.iloc[t:v].drop(["Date","HomeTeam","AwayTeam","target"], axis=1)
-y_valid = df.iloc[t:v]["target"].values
-odds_valid = odds.iloc[t:v][["B365H","B365D","B365A"]].values
+# --- Train/Validation split (encapsulated) ---
+# If you want to use a separate upcoming-games file as the test set, set upcoming_test_path to a CSV path.
+upcoming_test_path = None  # e.g. "Data/upcoming_games.csv"
+
+def create_splits(df, odds, upcoming_test_path=None, train_frac=0.7, valid_frac=0.85):
+    """Return X_train, y_train, X_valid, y_valid, odds_valid, X_test, y_test, odds_test
+
+    If upcoming_test_path is provided, that file is used as X_test/odds_test (it may not contain 'target').
+    Otherwise X_test/odds_test will be None.
+    """
+    n = len(df)
+    t = int(n * train_frac)
+    v = int(n * valid_frac)
+
+    X_train = df.iloc[:t].drop(["Date","HomeTeam","AwayTeam","target"], axis=1)
+    y_train = df.iloc[:t]["target"].values
+    X_valid = df.iloc[t:v].drop(["Date","HomeTeam","AwayTeam","target"], axis=1)
+    y_valid = df.iloc[t:v]["target"].values
+    odds_valid = odds.iloc[t:v][["B365H","B365D","B365A"]].values
+
+    X_test = None
+    y_test = None
+    odds_test = None
+    if upcoming_test_path:
+        up = pd.read_csv(upcoming_test_path, parse_dates=["Date"])  # expect same column names
+        # keep only rows with features present
+        odds_test = up[["B365H","B365D","B365A"]].values if all(c in up.columns for c in ["B365H","B365D","B365A"]) else None
+        drop_cols = [c for c in ["Date","HomeTeam","AwayTeam","target"] if c in up.columns]
+        X_test = up.drop(columns=drop_cols, errors='ignore')
+        if 'target' in up.columns:
+            y_test = up['target'].values
+
+    return X_train, y_train, X_valid, y_valid, odds_valid, X_test, y_test, odds_test
+
+
+# create splits now
+X_train, y_train, X_valid, y_valid, odds_valid, X_test, y_test, odds_test = create_splits(df, odds, upcoming_test_path)
+print(f"Shapes -> X_train: {X_train.shape}, y_train: {getattr(y_train,'shape', None)}, X_valid: {X_valid.shape}, y_valid: {getattr(y_valid,'shape', None)}")
+if X_test is not None:
+    print(f"Loaded upcoming test set: X_test {X_test.shape}, y_test {getattr(y_test,'shape', None)}, odds_test: {None if odds_test is None else odds_test.shape}")
 
 # --- simulate ROI for Flat betting (stake=1 each game) ---
 def simulate_roi_flat(preds, odds, actuals):

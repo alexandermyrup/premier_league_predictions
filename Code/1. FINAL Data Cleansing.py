@@ -1,30 +1,67 @@
 import pandas as pd
 import numpy as np
+import re
 
 # --- (Optional) If combining CSVs is needed, that code is commented out ---
-csv_files = [
-    r"Data\19-20.csv",
-    r"Data\20-21.csv",
-    r"Data\21-22.csv",
-    r"Data\22-23.csv",
-    r"Data\23-24.csv",
-    r"Data\24-25.csv",
- ]
-dataframes = [pd.read_csv(file) for file in csv_files]
-df_combined = pd.concat(dataframes)
-df_combined.to_csv(
-    r"Data\PL-games-19-24.csv",
-    index=False,
-)
+def combine_csvs():
+    csv_files = [
+        r"Data/19-20.csv",
+        r"Data/20-21.csv",
+        r"Data/21-22.csv",
+        r"Data/22-23.csv",
+        r"Data/23-24.csv",
+        r"Data/24-25.csv",
+    ]
+    dataframes = [pd.read_csv(file) for file in csv_files]
+    df_combined = pd.concat(dataframes)
+    df_combined.to_csv(
+        r"Data/PL-games-19-24.csv",
+        index=False,
+    )
 
-# --- Load Combined Data ---
-df = pd.read_csv(r"Data/PL-games-19-24.csv")
+
+# --- Load Combined Data and normalize column names (fix NBSP, zero-width, comma decimals, extra spaces)
+df = pd.read_csv("Data/PL-games-19-24.csv", sep=';', decimal='.')
 pd.set_option("display.max_columns", None)
 
-# Drop unused columns
-drop_cols = ["Div","Time","HTHG","HTAG","HTR","Referee",
-             "IWCH","IWCD","IWCA","IWH","IWD","IWA"]
-df.drop(columns=drop_cols, errors='ignore', inplace=True)
+orig_cols = list(df.columns)
+normalized = []
+for c in orig_cols:
+    nc = c.replace("\u00A0", " ")      # NBSP -> space
+    nc = nc.replace("\u200b", "")      # zero-width space -> nothing
+    nc = nc.replace(",", ".")           # comma decimal -> dot
+    nc = re.sub(r"\s+", " ", nc)       # collapse multiple spaces
+    nc = nc.strip()
+    normalized.append(nc)
+df.columns = normalized
+
+# Build drop list and detect columns by exact normalized match or by suspicious substrings
+orig_drop = ["Div","Time","HTHG","HTAG","HTR","Referee", "BWH", 'BWD', "BWA",
+             "IWCH","IWCD","IWCA","IWH","IWD","IWA", "BFH", "BFD", "BFA", "1XBH"]
+drop_norm = [c.replace("\u00A0", " ").replace(",", ".").strip() for c in orig_drop]
+
+# Substrings to catch: WH/VC/BW patterns and 1.00/BFE variants requested by user
+suspicious_substrs = ["WHCH","WHCD","WHCA","VCCH","VCCD","VCCA",
+                     "BWCH","BWCD","BWCA","WHH","WHD","WHA",
+                     "VCH","VCD","VCA",
+                     "1.00 XBD","1.00 XBA","BFE_less2.5","BFEC_less2.5",
+                     "BFE","BFEC"]
+
+exact_matches = [c for c in df.columns if c in drop_norm]
+contains_matches = [c for c in df.columns if any(sub in c for sub in suspicious_substrs)]
+to_drop = sorted(set(exact_matches + contains_matches))
+
+print("Column drop diagnostics:")
+print("  total columns:", len(df.columns))
+print("  exact normalized drop matches:", exact_matches)
+print("  contains-pattern matches:", contains_matches)
+if to_drop:
+    print("Dropping columns:", to_drop)
+    df.drop(columns=to_drop, errors='ignore', inplace=True)
+else:
+    print("No columns matched for dropping (check normalization/drop list)")
+
+df.drop(columns=to_drop, errors='ignore', inplace=True)
 
 # One-hot encode teams
 df = pd.concat([df, pd.get_dummies(df["HomeTeam"], prefix="HomeTeam")], axis=1)
