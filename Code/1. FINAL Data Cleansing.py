@@ -19,9 +19,10 @@ def combine_csvs():
         index=False,
     )
 
+#combine_csvs()
 
 # --- Load Combined Data and normalize column names (fix NBSP, zero-width, comma decimals, extra spaces)
-df = pd.read_csv("Data/PL-games-19-24.csv", sep=';', decimal='.')
+df = pd.read_csv("Data/PL-games-19-24.csv")
 pd.set_option("display.max_columns", None)
 
 orig_cols = list(df.columns)
@@ -34,6 +35,8 @@ for c in orig_cols:
     nc = nc.strip()
     normalized.append(nc)
 df.columns = normalized
+# normalize '<' to '_less' early so detection picks up variants like 'B365C<2.5'
+df.columns = [c.replace('<', '_less') for c in df.columns]
 
 # Build drop list and detect columns by exact normalized match or by suspicious substrings
 orig_drop = ["Div","Time","HTHG","HTAG","HTR","Referee", "BWH", 'BWD', "BWA",
@@ -41,11 +44,20 @@ orig_drop = ["Div","Time","HTHG","HTAG","HTR","Referee", "BWH", 'BWD', "BWA",
 drop_norm = [c.replace("\u00A0", " ").replace(",", ".").strip() for c in orig_drop]
 
 # Substrings to catch: WH/VC/BW patterns and 1.00/BFE variants requested by user
-suspicious_substrs = ["WHCH","WHCD","WHCA","VCCH","VCCD","VCCA",
-                     "BWCH","BWCD","BWCA","WHH","WHD","WHA",
-                     "VCH","VCD","VCA",
-                     "1.00 XBD","1.00 XBA","BFE_less2.5","BFEC_less2.5",
-                     "BFE","BFEC"]
+suspicious_substrs = [
+    "WHCH","WHCD","WHCA","VCCH","VCCD","VCCA",
+    "BWCH","BWCD","BWCA","WHH","WHD","WHA",
+    "VCH","VCD","VCA",
+    "1.00 XBD","1.00 XBA","BFE_less2.5","BFEC_less2.5",
+    "BFE","BFEC",
+    # additional columns requested to drop
+    "B365CH","B365CD","B365CA","PSCH","PSCD","PSCA",
+    "MaxCH","MaxCD","MaxCA","AvgCH","AvgCD","AvgCA",
+    "B365C>2.5","B365C_less2.5","PC>2.5","PC_less2.5",
+    "MaxC>2.5","MaxC_less2.5","AvgC>2.5","AvgC_less2.5",
+    "AHCh","B365CAHH","B365CAHA","PCAHH","PCAHA","MaxCAHH","MaxCAHA","AvgCAHH","AvgCAHA",
+    "BFCH","BFCD","BFCA","1XBCH","1XBCD","1XBCA",
+]
 
 exact_matches = [c for c in df.columns if c in drop_norm]
 contains_matches = [c for c in df.columns if any(sub in c for sub in suspicious_substrs)]
