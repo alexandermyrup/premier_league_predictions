@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-df = pd.read_csv('Data/PL-games-14-24.csv')
+df = pd.read_csv('Data/Processed/PL-games-19-24.csv')
 
 # 1) Stack home and away performances into one table
 home = df[['HomeTeam', 'FTR']].rename(columns={'HomeTeam': 'team'})

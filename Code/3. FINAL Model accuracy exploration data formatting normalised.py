@@ -21,11 +21,11 @@ from sklearn.dummy import DummyClassifier
 
 # ----- Data Loading and Preprocessing -----
 df = pd.read_csv(
-    "Data/PL-games-19-24-feature-engineered-final-3-normalised.csv",
+    "Data/Processed/PL-games-19-24-feature-engineered-final-3-normalised.csv",
     parse_dates=["Date"]
 )
 df2 = pd.read_csv(
-    "Data/PL-games-19-24-feature-engineered-final-3.csv",
+    "Data/Processed/PL-games-19-24-feature-engineered-final-3.csv",
     parse_dates=["Date"]
 )
 
@@ -139,7 +139,7 @@ for name, clf in dict_models.items():
     output_df[f"{name}_Probability"] = prob_of_pred
 
 # Save predictions CSV
-output_df.to_csv("Data/predictions_test_data_normalised.csv", index=False)
+output_df.to_csv("Data/Output/predictions_test_data_normalised.csv", index=False)
 
 # ─── Compute metrics ───
 y_test_bin = label_binarize(y_test, classes=target_classes)
@@ -160,5 +160,5 @@ for name, clf in dict_models.items():
     })
 
 metrics_df = pd.DataFrame(metrics)
-metrics_df.to_csv("Data/model_metrics.csv", index=False)
+metrics_df.to_csv("Data/Output/model_metrics.csv", index=False)
 print(metrics_df)

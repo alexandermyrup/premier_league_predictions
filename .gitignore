@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# ML training artifacts
+catboost_info/
+Models/
+
+# IDE
+.vscode/
+.idea/
