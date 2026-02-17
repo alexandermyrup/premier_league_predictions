@@ -21,11 +21,11 @@ from sklearn.inspection import permutation_importance
 
 # ----- Data Loading and Preprocessing -----
 df = pd.read_csv(
-    "Data/PL-games-19-24-feature-engineered-final-3-normalised.csv",
+    "Data/Processed/PL-games-19-24-feature-engineered-final-3-normalised.csv",
     parse_dates=["Date"]
 )
 df2 = pd.read_csv(
-    "Data/PL-games-19-24-feature-engineered-final-3.csv",
+    "Data/Processed/PL-games-19-24-feature-engineered-final-3.csv",
     parse_dates=["Date"]
 )
 
@@ -120,7 +120,7 @@ for name, clf in dict_models.items():
     output_df[f"{name}_Prediction"] = preds
     output_df[f"{name}_Probability"] = prob_of_pred
 
-output_df.to_csv("Data/predictions_test_data_normalised.csv", index=False)
+output_df.to_csv("Data/Output/predictions_test_data_normalised.csv", index=False)
 
 # ----- Compute Metrics -----
 y_test_bin = label_binarize(y_test, classes=target_classes)
@@ -139,7 +139,7 @@ for name in dict_models:
     })
 
 metrics_df = pd.DataFrame(metrics)
-metrics_df.to_csv("Data/model_metrics.csv", index=False)
+metrics_df.to_csv("Data/Output/model_metrics.csv", index=False)
 print(metrics_df)
 
 # ----- Feature Importance Extraction & Pivoting -----
@@ -182,7 +182,7 @@ for name, clf in dict_models.items():
 # pivot to one column per model, 20 rows
 pivot_df = pd.DataFrame(top20_per_model)
 pivot_df.to_csv(
-    "Data/feature_importances_top20_by_model.csv",
+    "Data/Output/feature_importances_top20_by_model.csv",
     index=False
 )
 print("Saved normalized feature importances to Data/feature_importances_top20_by_model.csv")

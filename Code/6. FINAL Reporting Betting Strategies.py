@@ -16,7 +16,7 @@ from catboost import CatBoostClassifier
 # ---------------------------------------------------
 # 1) Read Data
 # ---------------------------------------------------
-DATA_PATH = Path("Data/PL-games-19-24-feature-engineered-final-3-normalised.csv")
+DATA_PATH = Path("Data/Processed/PL-games-19-24-feature-engineered-final-3-normalised.csv")
 if not DATA_PATH.exists():
     raise FileNotFoundError(f"CSV not found at {DATA_PATH.resolve()}")
 
@@ -228,7 +228,7 @@ for strat in STRATEGIES:
         })
 
 metrics_df = pd.DataFrame(metrics)
-out_csv = graphs_dir / "strategy_model_summary.csv"
+out_csv = Path("Data/Output") / "strategy_model_summary.csv"
 metrics_df.to_csv(out_csv, index=False)
 print(f"Summary metrics written to: {out_csv.resolve()}")
 
@@ -314,7 +314,7 @@ print(f"ROI heatmap saved to: {heatmap_fn.resolve()}")
 # ---------------------------------------------------
 # 11) Train & save models for feature importances
 # ---------------------------------------------------
-TRAIN_PATH = Path("Data/training_data.csv")
+TRAIN_PATH = Path("Data/Processed/training_data.csv")
 if TRAIN_PATH.exists():
     train = pd.read_csv(TRAIN_PATH, parse_dates=["Date"])
     # assume raw features plus 'target' and 'Date'
@@ -386,7 +386,7 @@ for model_name, model_path in model_paths.items():
 
 if feature_importances_list:
     feat_imp_df = pd.concat(feature_importances_list, ignore_index=True)
-    feat_imp_csv = graphs_dir / "feature_importances_top20.csv"
+    feat_imp_csv = Path("Data/Output") / "feature_importances_top20.csv"
     feat_imp_df.to_csv(feat_imp_csv, index=False)
     print(f"Top 20 feature importances saved to: {feat_imp_csv.resolve()}")
 else:

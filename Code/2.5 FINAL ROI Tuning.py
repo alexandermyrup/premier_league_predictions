@@ -16,9 +16,9 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
 
 # --- Load data ---
-df = pd.read_csv("Data/PL-games-19-24-feature-engineered-final-3-normalised.csv", parse_dates=["Date"]) \
+df = pd.read_csv("Data/Processed/PL-games-19-24-feature-engineered-final-3-normalised.csv", parse_dates=["Date"]) \
     .dropna().sort_values("Date")
-odds = pd.read_csv("Data/PL-games-19-24-feature-engineered-final-3.csv", parse_dates=["Date"]) \
+odds = pd.read_csv("Data/Processed/PL-games-19-24-feature-engineered-final-3.csv", parse_dates=["Date"]) \
     .dropna().sort_values("Date")
 
 # --- Train/Validation split (encapsulated) ---
@@ -171,7 +171,7 @@ print('Best parameters per model:')
 print(df_best.to_string(index=False))
 
 # Optionally save to CSV
-output_csv = 'best_parameters_per_model.csv'
+output_csv = 'Data/Output/best_parameters_per_model.csv'
 df_best.to_csv(output_csv, index=False)
 print(f'Saved best parameters per model to {output_csv}')
 

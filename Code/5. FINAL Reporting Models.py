@@ -25,11 +25,11 @@ from catboost import CatBoostClassifier
 
 # ----- Data Loading and Preprocessing -----
 df = pd.read_csv(
-    "Data/PL-games-19-24-feature-engineered-final-3-normalised.csv",
+    "Data/Processed/PL-games-19-24-feature-engineered-final-3-normalised.csv",
     parse_dates=["Date"]
 )
 df2 = pd.read_csv(
-    "Data/PL-games-19-24-feature-engineered-final-3.csv",
+    "Data/Processed/PL-games-19-24-feature-engineered-final-3.csv",
     parse_dates=["Date"]
 )
 
@@ -143,7 +143,7 @@ for name, clf in dict_models.items():
     output_df[f"{name}_Probability"] = np.max(probs, axis=1)
 
 # Save predictions CSV
-output_df.to_csv("Data/predictions_test_data_normalised.csv", index=False)
+output_df.to_csv("Data/Output/predictions_test_data_normalised.csv", index=False)
 
 # ─── Compute metrics ───
 y_test_bin = label_binarize(y_test, classes=target_classes)
@@ -161,11 +161,11 @@ for name in dict_models:
         'Brier': np.mean(np.sum((probs - y_test_bin) ** 2, axis=1))
     })
 metrics_df = pd.DataFrame(metrics)
-metrics_df.to_csv("Data/model_metrics.csv", index=False)
+metrics_df.to_csv("Data/Output/model_metrics.csv", index=False)
 print(metrics_df)
 
 # Ensure graphs directory exists
-os.makedirs('graphs', exist_ok=True)
+os.makedirs('Graphs', exist_ok=True)
 
 # Generate and save confusion matrices for each model
 for name, preds in pred_store.items():
@@ -185,7 +185,7 @@ for name, preds in pred_store.items():
                  ha="center", va="center",
                  color="white" if cm[i, j] > thresh else "black")
     plt.tight_layout()
-    plt.savefig(f"graphs/confusion_{name}.png")
+    plt.savefig(f"Graphs/confusion_{name}.png")
     plt.close()
 
 # Plot macro-average ROC curve for all models
@@ -223,5 +223,5 @@ plt.ylabel('True Positive Rate')
 plt.title('Macro-average ROC Curve for All Models')
 plt.legend(loc='lower right')
 plt.tight_layout()
-plt.savefig("graphs/roc_all_models_macro.png")
+plt.savefig("Graphs/roc_all_models_macro.png")
 plt.show()

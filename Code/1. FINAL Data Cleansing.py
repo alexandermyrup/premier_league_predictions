@@ -5,24 +5,24 @@ import re
 # --- (Optional) If combining CSVs is needed, that code is commented out ---
 def combine_csvs():
     csv_files = [
-        r"Data/19-20.csv",
-        r"Data/20-21.csv",
-        r"Data/21-22.csv",
-        r"Data/22-23.csv",
-        r"Data/23-24.csv",
-        r"Data/24-25.csv",
+        r"Data/Raw/19-20.csv",
+        r"Data/Raw/20-21.csv",
+        r"Data/Raw/21-22.csv",
+        r"Data/Raw/22-23.csv",
+        r"Data/Raw/23-24.csv",
+        r"Data/Raw/24-25.csv",
     ]
     dataframes = [pd.read_csv(file) for file in csv_files]
     df_combined = pd.concat(dataframes)
     df_combined.to_csv(
-        r"Data/PL-games-19-24.csv",
+        r"Data/Processed/PL-games-19-24.csv",
         index=False,
     )
 
 #combine_csvs()
 
 # --- Load Combined Data and normalize column names (fix NBSP, zero-width, comma decimals, extra spaces)
-df = pd.read_csv("Data/PL-games-19-24.csv")
+df = pd.read_csv("Data/Processed/PL-games-19-24.csv")
 pd.set_option("display.max_columns", None)
 
 orig_cols = list(df.columns)
@@ -146,6 +146,6 @@ df.drop(columns=raw_cols, errors='ignore', inplace=True)
 df.columns = df.columns.str.replace("<", "_less")
 
 # Save final feature-engineered data
-df.to_csv(r"Data/PL-games-19-24-feature-engineered-final-3.csv", index=False)
+df.to_csv(r"Data/Processed/PL-games-19-24-feature-engineered-final-3.csv", index=False)
 
 print("Head-to-head features added and DataFrame saved.")

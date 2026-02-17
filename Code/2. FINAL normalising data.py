@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
 # Load the DataFrame
-df = pd.read_csv("Data/PL-games-19-24-feature-engineered-final-3.csv")
+df = pd.read_csv("Data/Processed/PL-games-19-24-feature-engineered-final-3.csv")
 
 
 # Define the target column
@@ -22,6 +22,6 @@ df[feature_cols] = scaler.fit_transform(df[feature_cols])
 print(df.head())
 
 # Save the normalized DataFrame to a CSV file
-df.to_csv("Data/PL-games-19-24-feature-engineered-final-3-normalised.csv", index=False)
+df.to_csv("Data/Processed/PL-games-19-24-feature-engineered-final-3-normalised.csv", index=False)
 
 print("Normalized data saved successfully!")
