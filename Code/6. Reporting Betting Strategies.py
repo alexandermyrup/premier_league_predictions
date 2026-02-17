@@ -16,7 +16,7 @@ from catboost import CatBoostClassifier
 # ---------------------------------------------------
 # 1) Read Data
 # ---------------------------------------------------
-DATA_PATH = Path("Data/Processed/PL-games-19-24-feature-engineered-final-3-normalised.csv")
+DATA_PATH = Path("Data/Output/predictions_test_data_normalised.csv")
 if not DATA_PATH.exists():
     raise FileNotFoundError(f"CSV not found at {DATA_PATH.resolve()}")
 
